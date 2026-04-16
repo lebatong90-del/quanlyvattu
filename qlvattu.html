@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Quản lý áo & nón văn phòng</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --danger: #dc2626;
+      --success: #16a34a;
+      --warning: #d97706;
+      --shadow: 0 6px 20px rgba(0,0,0,0.08);
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    body {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 12px;
+    }
+
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(245,247,251,0.95);
+      backdrop-filter: blur(8px);
+      padding: 10px 0 12px;
+    }
+
+    .title {
+      margin: 0 0 4px;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      margin: 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      margin-top: 12px;
+    }
+
+    .section-title {
+      margin: 0 0 12px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: #fff;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .tab-btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 8px;
+      background: #e8eefc;
+      color: var(--primary-dark);
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    input, select, textarea, button {
+      font: inherit;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 11px 12px;
+      background: #fff;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .hidden { display: none !important; }
+
+    .btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn-primary:active { transform: scale(0.99); }
+
+    .btn-secondary {
+      background: #eef2ff;
+      color: var(--primary-dark);
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .notice {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .status.success { color: var(--success); }
+    .status.error { color: var(--danger); }
+    .status.warn { color: var(--warning); }
+
+    .history-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .history-item {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: #fff;
+    }
+
+    .history-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: #eef2ff;
+      color: var(--primary-dark);
+    }
+
+    .history-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .history-date {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .history-meta {
+      display: grid;
+      gap: 4px;
+      font-size: 13px;
+      color: #374151;
+    }
+
+    .filter-box {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .small {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    @media (min-width: 640px) {
+      .form-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .full {
+        grid-column: 1 / -1;
+      }
+      .stats {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-header">
+    <h1 class="title">Quản lý áo & nón</h1>
+    <p class="subtitle">Giao diện ưu tiên điện thoại • lưu dữ liệu bằng Google Sheet</p>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="overview">Tổng quan</button>
+      <button class="tab-btn" data-tab="export">Xuất kho</button>
+      <button class="tab-btn" data-tab="history">Lịch sử</button>
+    </div>
+  </div>
+
+  <section id="overview" class="tab-content active">
+    <div class="card">
+      <h2 class="section-title">Tồn kho hiện tại</h2>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Tổng nón còn lại</div>
+          <div class="stat-value" id="tonNon">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Nón nhân viên đã xuất</div>
+          <div class="stat-value" id="xuatNonNV">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Nón khách hàng đã xuất</div>
+          <div class="stat-value" id="xuatNonKH">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Tổng lượt xuất</div>
+          <div class="stat-value" id="tongLuotXuat">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">Tồn áo</h2>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Áo nhân viên còn lại</div>
+          <div class="stat-value" id="tonAoNV">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Áo khách hàng còn lại</div>
+          <div class="stat-value" id="tonAoKH">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Áo nhân viên đã xuất</div>
+          <div class="stat-value" id="xuatAoNV">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Áo khách hàng đã xuất</div>
+          <div class="stat-value" id="xuatAoKH">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">Thiết lập tồn đầu kỳ</h2>
+      <div class="notice">
+        Bạn chỉ nhập tồn đầu kỳ để hệ thống tự tính tồn còn lại. Nón chỉ có 1 kho tổng, nhưng khi xuất sẽ chia thành 2 mục đích: nón nhân viên hoặc nón khách hàng.
+      </div>
+      <div class="form-grid" style="margin-top: 12px;">
+        <div>
+          <label for="inputTonNon">Tồn đầu kỳ nón</label>
+          <input type="number" id="inputTonNon" min="0" placeholder="Đang tải..." disabled />
+        </div>
+        <div>
+          <label for="inputTonAoNV">Tồn đầu kỳ áo nhân viên</label>
+          <input type="number" id="inputTonAoNV" min="0" placeholder="Đang tải..." disabled />
+        </div>
+        <div>
+          <label for="inputTonAoKH">Tồn đầu kỳ áo khách hàng</label>
+          <input type="number" id="inputTonAoKH" min="0" placeholder="Đang tải..." disabled/>
+        </div>
+        <div class="full toolbar" style="align-items: end;">
+          <button class="btn btn-primary" id="saveSettingsBtn">Lưu tồn đầu kỳ</button>
+          <button class="btn btn-secondary" id="reloadBtn">Tải lại dữ liệu</button>
+        </div>
+      </div>
+      <div id="settingsStatus" class="status"></div>
+    </div>
+  </section>
+
+  <section id="export" class="tab-content">
+    <div class="card">
+      <h2 class="section-title">Phiếu xuất kho</h2>
+      <form id="exportForm" class="form-grid">
+        <div>
+          <label for="itemType">Mặt hàng</label>
+          <select id="itemType" required>
+            <option value="">-- Chọn mặt hàng --</option>
+            <option value="non">Nón</option>
+            <option value="ao">Áo</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="targetType">Xuất cho</label>
+          <select id="targetType" required>
+            <option value="">-- Chọn đối tượng --</option>
+            <option value="nhan_vien">Nhân viên</option>
+            <option value="khach_hang">Khách hàng</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="quantity">Số lượng</label>
+          <input type="number" id="quantity" min="1" value="1" required />
+        </div>
+
+        <div id="hatCodeWrap" class="hidden">
+          <label for="hatCode">Số nón ghi trên nón</label>
+          <input type="text" id="hatCode" placeholder="Ví dụ: NÓN-015" />
+        </div>
+
+        <div>
+          <label for="receiver">Người lấy</label>
+          <input type="text" id="receiver" placeholder="Nhập tên người lấy" required />
+        </div>
+
+        <div>
+          <label for="requester">Người yêu cầu (nếu có)</label>
+          <input type="text" id="requester" placeholder="Có thể để trống" />
+        </div>
+
+        <div class="full">
+          <label for="note">Ghi chú</label>
+          <textarea id="note" placeholder="Ghi chú thêm nếu có"></textarea>
+        </div>
+
+        <div class="full toolbar">
+          <button class="btn btn-primary" type="submit">Lưu phiếu xuất</button>
+          <button class="btn btn-secondary" type="button" id="clearFormBtn">Xóa form</button>
+        </div>
+      </form>
+      <div id="exportStatus" class="status"></div>
+    </div>
+  </section>
+
+  <section id="history" class="tab-content">
+    <div class="card">
+      <h2 class="section-title">Lịch sử xuất kho</h2>
+      <div class="filter-box">
+        <select id="filterItem">
+          <option value="all">Tất cả mặt hàng</option>
+          <option value="non">Nón</option>
+          <option value="ao">Áo</option>
+        </select>
+        <select id="filterTarget">
+          <option value="all">Tất cả đối tượng</option>
+          <option value="nhan_vien">Nhân viên</option>
+          <option value="khach_hang">Khách hàng</option>
+        </select>
+        <input type="text" id="searchKeyword" placeholder="Tìm theo người lấy / người yêu cầu / ghi chú" />
+      </div>
+      <div class="small">Phần này cho xem lại toàn bộ thông tin đã xuất, kèm lọc nhanh.</div>
+      <div class="history-list" id="historyList" style="margin-top: 12px;"></div>
+    </div>
+  </section>
+
+  <script>
+    /**
+     * =========================
+     * CẤU HÌNH KẾT NỐI GOOGLE SHEET
+     * =========================
+     * Thay URL bên dưới bằng URL web app của Google Apps Script.
+     */
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwqBQBfWpKNFdGMhZpJSn_uFW5SQuU1xVJdxcGSgTM22U3nSp9FeVbqdI10oJV6Xhc/exec';
+
+    const state = {
+      settings: {
+        tonDauKyNon: 0,
+        tonDauKyAoNV: 0,
+        tonDauKyAoKH: 0,
+      },
+      exports: []
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const formatDateTime = (value) => {
+      const d = new Date(value);
+      if (isNaN(d)) return value || '';
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    };
+
+    const itemText = (v) => v === 'non' ? 'Nón' : 'Áo';
+    const targetText = (v) => v === 'nhan_vien' ? 'Nhân viên' : 'Khách hàng';
+
+    function setStatus(el, text, type = 'success') {
+      el.className = `status ${type}`;
+      el.textContent = text || '';
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tabId);
+      });
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.toggle('active', tab.id === tabId);
+      });
+    }
+
+    function updateConditionalFields() {
+      const item = $('itemType').value;
+      const target = $('targetType').value;
+      const showHatCode = item === 'non' && target === 'nhan_vien';
+      $('hatCodeWrap').classList.toggle('hidden', !showHatCode);
+      $('hatCode').required = showHatCode;
+      if (!showHatCode) $('hatCode').value = '';
+    }
+
+    function calculateSummary() {
+      let xuatNonNV = 0;
+      let xuatNonKH = 0;
+      let xuatAoNV = 0;
+      let xuatAoKH = 0;
+
+      state.exports.forEach(row => {
+        const qty = Number(row.quantity || 0);
+        if (row.itemType === 'non' && row.targetType === 'nhan_vien') xuatNonNV += qty;
+        if (row.itemType === 'non' && row.targetType === 'khach_hang') xuatNonKH += qty;
+        if (row.itemType === 'ao' && row.targetType === 'nhan_vien') xuatAoNV += qty;
+        if (row.itemType === 'ao' && row.targetType === 'khach_hang') xuatAoKH += qty;
+      });
+
+      const tonNon = Math.max(0, Number(state.settings.tonDauKyNon || 0) - (xuatNonNV + xuatNonKH));
+      const tonAoNV = Math.max(0, Number(state.settings.tonDauKyAoNV || 0) - xuatAoNV);
+      const tonAoKH = Math.max(0, Number(state.settings.tonDauKyAoKH || 0) - xuatAoKH);
+
+      $('tonNon').textContent = tonNon;
+      $('xuatNonNV').textContent = xuatNonNV;
+      $('xuatNonKH').textContent = xuatNonKH;
+      $('tongLuotXuat').textContent = state.exports.length;
+      $('tonAoNV').textContent = tonAoNV;
+      $('tonAoKH').textContent = tonAoKH;
+      $('xuatAoNV').textContent = xuatAoNV;
+      $('xuatAoKH').textContent = xuatAoKH;
+
+      $('inputTonNon').value = Number(state.settings.tonDauKyNon || 0);
+      $('inputTonAoNV').value = Number(state.settings.tonDauKyAoNV || 0);
+      $('inputTonAoKH').value = Number(state.settings.tonDauKyAoKH || 0);
+    }
+
+    function renderHistory() {
+      const wrap = $('historyList');
+      const filterItem = $('filterItem').value;
+      const filterTarget = $('filterTarget').value;
+      const keyword = $('searchKeyword').value.trim().toLowerCase();
+
+      let list = [...state.exports].reverse();
+
+      list = list.filter(row => {
+        const okItem = filterItem === 'all' || row.itemType === filterItem;
+        const okTarget = filterTarget === 'all' || row.targetType === filterTarget;
+        const searchText = `${row.receiver || ''} ${row.requester || ''} ${row.note || ''} ${row.hatCode || ''}`.toLowerCase();
+        const okKeyword = !keyword || searchText.includes(keyword);
+        return okItem && okTarget && okKeyword;
+      });
+
+      if (!list.length) {
+        wrap.innerHTML = '<div class="notice">Chưa có dữ liệu xuất kho.</div>';
+        return;
+      }
+
+      wrap.innerHTML = list.map(row => `
+        <div class="history-item">
+          <div class="history-top">
+            <div>
+              <div class="badge">${itemText(row.itemType)} • ${targetText(row.targetType)}</div>
+              <p class="history-title" style="margin-top:8px;">Số lượng: ${row.quantity}</p>
+            </div>
+            <div class="history-date">${formatDateTime(row.createdAt)}</div>
+          </div>
+          <div class="history-meta">
+            <div><strong>Người lấy:</strong> ${escapeHtml(row.receiver || '')}</div>
+            <div><strong>Người yêu cầu:</strong> ${escapeHtml(row.requester || '-')}</div>
+            ${row.itemType === 'non' && row.targetType === 'nhan_vien' ? `<div><strong>Số nón:</strong> ${escapeHtml(row.hatCode || '-')}</div>` : ''}
+            <div><strong>Ghi chú:</strong> ${escapeHtml(row.note || '-')}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    async function api(action, payload = {}) {
+      if (!API_URL || API_URL.includes('PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEBAPP_URL_HERE')) {
+        throw new Error('Bạn chưa dán URL Google Apps Script vào biến API_URL.');
+      }
+
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action, ...payload })
+      });
+
+      const text = await res.text();
+      let json = {};
+      try {
+        json = JSON.parse(text);
+      } catch (e) {
+        throw new Error('Phản hồi từ server không hợp lệ: ' + text);
+      }
+
+      if (!json.success) {
+        throw new Error(json.message || 'Có lỗi xảy ra');
+      }
+
+      return json;
+    }
+
+    async function loadData() {
+      setStatus($('settingsStatus'), 'Đang tải dữ liệu...', 'warn');
+      try {
+        const data = await api('getData');
+        state.settings = data.settings || state.settings;
+        state.exports = Array.isArray(data.exports) ? data.exports : [];
+        calculateSummary();
+        renderHistory();
+        setStatus($('settingsStatus'), 'Tải dữ liệu thành công.', 'success');
+      } catch (err) {
+        setStatus($('settingsStatus'), err.message, 'error');
+      }
+    }
+
+    async function saveSettings() {
+      const tonDauKyNon = Number($('inputTonNon').value || 0);
+      const tonDauKyAoNV = Number($('inputTonAoNV').value || 0);
+      const tonDauKyAoKH = Number($('inputTonAoKH').value || 0);
+
+      try {
+        setStatus($('settingsStatus'), 'Đang lưu tồn đầu kỳ...', 'warn');
+        const data = await api('saveSettings', {
+          settings: { tonDauKyNon, tonDauKyAoNV, tonDauKyAoKH }
+        });
+        state.settings = data.settings;
+        calculateSummary();
+        setStatus($('settingsStatus'), 'Đã lưu tồn đầu kỳ.', 'success');
+      } catch (err) {
+        setStatus($('settingsStatus'), err.message, 'error');
+      }
+    }
+
+    function clearForm() {
+      $('exportForm').reset();
+      $('quantity').value = 1;
+      updateConditionalFields();
+      setStatus($('exportStatus'), '', 'success');
+    }
+
+    async function submitExport(e) {
+      e.preventDefault();
+      const payload = {
+        itemType: $('itemType').value,
+        targetType: $('targetType').value,
+        quantity: Number($('quantity').value || 0),
+        hatCode: $('hatCode').value.trim(),
+        receiver: $('receiver').value.trim(),
+        requester: $('requester').value.trim(),
+        note: $('note').value.trim(),
+      };
+
+      if (!payload.itemType || !payload.targetType || !payload.quantity || !payload.receiver) {
+        setStatus($('exportStatus'), 'Vui lòng nhập đủ thông tin bắt buộc.', 'error');
+        return;
+      }
+
+      if (payload.itemType === 'non' && payload.targetType === 'nhan_vien' && !payload.hatCode) {
+        setStatus($('exportStatus'), 'Xuất nón cho nhân viên phải nhập số nón.', 'error');
+        return;
+      }
+
+      // Kiểm tra tồn kho ngay trên giao diện
+      const current = getCurrentStockPreview();
+      if (payload.itemType === 'non' && payload.quantity > current.tonNon) {
+        setStatus($('exportStatus'), 'Số lượng xuất vượt tồn kho nón.', 'error');
+        return;
+      }
+      if (payload.itemType === 'ao' && payload.targetType === 'nhan_vien' && payload.quantity > current.tonAoNV) {
+        setStatus($('exportStatus'), 'Số lượng xuất vượt tồn kho áo nhân viên.', 'error');
+        return;
+      }
+      if (payload.itemType === 'ao' && payload.targetType === 'khach_hang' && payload.quantity > current.tonAoKH) {
+        setStatus($('exportStatus'), 'Số lượng xuất vượt tồn kho áo khách hàng.', 'error');
+        return;
+      }
+
+      try {
+        setStatus($('exportStatus'), 'Đang lưu phiếu xuất...', 'warn');
+        const data = await api('saveExport', { exportRow: payload });
+        state.exports = Array.isArray(data.exports) ? data.exports : state.exports;
+        state.settings = data.settings || state.settings;
+        calculateSummary();
+        renderHistory();
+        clearForm();
+        setStatus($('exportStatus'), 'Đã lưu phiếu xuất thành công.', 'success');
+        switchTab('overview');
+      } catch (err) {
+        setStatus($('exportStatus'), err.message, 'error');
+      }
+    }
+
+    function getCurrentStockPreview() {
+      let xuatNon = 0, xuatAoNV = 0, xuatAoKH = 0;
+      state.exports.forEach(row => {
+        const qty = Number(row.quantity || 0);
+        if (row.itemType === 'non') xuatNon += qty;
+        if (row.itemType === 'ao' && row.targetType === 'nhan_vien') xuatAoNV += qty;
+        if (row.itemType === 'ao' && row.targetType === 'khach_hang') xuatAoKH += qty;
+      });
+      return {
+        tonNon: Math.max(0, Number(state.settings.tonDauKyNon || 0) - xuatNon),
+        tonAoNV: Math.max(0, Number(state.settings.tonDauKyAoNV || 0) - xuatAoNV),
+        tonAoKH: Math.max(0, Number(state.settings.tonDauKyAoKH || 0) - xuatAoKH),
+      };
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    $('itemType').addEventListener('change', updateConditionalFields);
+    $('targetType').addEventListener('change', updateConditionalFields);
+    $('saveSettingsBtn').addEventListener('click', saveSettings);
+    $('reloadBtn').addEventListener('click', loadData);
+    $('clearFormBtn').addEventListener('click', clearForm);
+    $('exportForm').addEventListener('submit', submitExport);
+    $('filterItem').addEventListener('change', renderHistory);
+    $('filterTarget').addEventListener('change', renderHistory);
+    $('searchKeyword').addEventListener('input', renderHistory);
+
+    loadData();
+  </script>
+
+  <!--
+    ============================================================
+    GOOGLE APPS SCRIPT MẪU (DÁN RIÊNG VÀO Apps Script, KHÔNG PHẢI TRONG HTML)
+    ============================================================
+
+    1) Tạo 1 Google Sheet mới gồm 2 sheet:
+       - Sheet 1: SETTINGS
+       - Sheet 2: EXPORTS
+
+    2) Cấu trúc sheet SETTINGS:
+       A1:key | B1:value
+       A2:tonDauKyNon | B2:100
+       A3:tonDauKyAoNV | B3:50
+       A4:tonDauKyAoKH | B4:30
+
+    3) Cấu trúc sheet EXPORTS (header dòng 1):
+       createdAt | itemType | targetType | quantity | hatCode | receiver | requester | note
+
+    4) Code Apps Script:
+
+    const SHEET_ID = 'DAN_ID_GOOGLE_SHEET_CUA_BAN';
+
+    function doPost(e) {
+      try {
+        const body = JSON.parse(e.postData.contents || '{}');
+        const action = body.action;
+
+        if (action === 'getData') {
+          return jsonOut({ success: true, settings: getSettings_(), exports: getExports_() });
+        }
+
+        if (action === 'saveSettings') {
+          saveSettings_(body.settings || {});
+          return jsonOut({ success: true, settings: getSettings_() });
+        }
+
+        if (action === 'saveExport') {
+          const row = body.exportRow || {};
+          validateExport_(row);
+          appendExport_(row);
+          return jsonOut({ success: true, settings: getSettings_(), exports: getExports_() });
+        }
+
+        return jsonOut({ success: false, message: 'Action không hợp lệ.' });
+      } catch (err) {
+        return jsonOut({ success: false, message: err.message || String(err) });
+      }
+    }
+
+    function jsonOut(data) {
+      return ContentService
+        .createTextOutput(JSON.stringify(data))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    function getSS_() {
+      return SpreadsheetApp.openById(SHEET_ID);
+    }
+
+    function getSettingsSheet_() {
+      return getSS_().getSheetByName('SETTINGS');
+    }
+
+    function getExportsSheet_() {
+      return getSS_().getSheetByName('EXPORTS');
+    }
+
+    function getSettings_() {
+      const sh = getSettingsSheet_();
+      const values = sh.getRange(2, 1, Math.max(sh.getLastRow()-1, 0), 2).getValues();
+      const map = {
+        tonDauKyNon: 0,
+        tonDauKyAoNV: 0,
+        tonDauKyAoKH: 0,
+      };
+      values.forEach(r => {
+        if (r[0]) map[r[0]] = Number(r[1] || 0);
+      });
+      return map;
+    }
+
+    function saveSettings_(settings) {
+      const sh = getSettingsSheet_();
+      const rows = [
+        ['key', 'value'],
+        ['tonDauKyNon', Number(settings.tonDauKyNon || 0)],
+        ['tonDauKyAoNV', Number(settings.tonDauKyAoNV || 0)],
+        ['tonDauKyAoKH', Number(settings.tonDauKyAoKH || 0)],
+      ];
+      sh.clearContents();
+      sh.getRange(1, 1, rows.length, rows[0].length).setValues(rows);
+    }
+
+    function getExports_() {
+      const sh = getExportsSheet_();
+      const lastRow = sh.getLastRow();
+      if (lastRow < 2) return [];
+      const values = sh.getRange(2, 1, lastRow - 1, 8).getValues();
+      return values.map(r => ({
+        createdAt: r[0],
+        itemType: r[1],
+        targetType: r[2],
+        quantity: Number(r[3] || 0),
+        hatCode: r[4] || '',
+        receiver: r[5] || '',
+        requester: r[6] || '',
+        note: r[7] || '',
+      }));
+    }
+
+    function validateExport_(row) {
+      if (!row.itemType) throw new Error('Thiếu mặt hàng.');
+      if (!row.targetType) throw new Error('Thiếu đối tượng xuất.');
+      if (!row.quantity || Number(row.quantity) <= 0) throw new Error('Số lượng không hợp lệ.');
+      if (!row.receiver) throw new Error('Thiếu người lấy.');
+      if (row.itemType === 'non' && row.targetType === 'nhan_vien' && !row.hatCode) {
+        throw new Error('Xuất nón cho nhân viên phải có số nón.');
+      }
+
+      const settings = getSettings_();
+      const exports = getExports_();
+
+      let xuatNon = 0, xuatAoNV = 0, xuatAoKH = 0;
+      exports.forEach(r => {
+        const qty = Number(r.quantity || 0);
+        if (r.itemType === 'non') xuatNon += qty;
+        if (r.itemType === 'ao' && r.targetType === 'nhan_vien') xuatAoNV += qty;
+        if (r.itemType === 'ao' && r.targetType === 'khach_hang') xuatAoKH += qty;
+      });
+
+      const tonNon = Number(settings.tonDauKyNon || 0) - xuatNon;
+      const tonAoNV = Number(settings.tonDauKyAoNV || 0) - xuatAoNV;
+      const tonAoKH = Number(settings.tonDauKyAoKH || 0) - xuatAoKH;
+      const qty = Number(row.quantity || 0);
+
+      if (row.itemType === 'non' && qty > tonNon) throw new Error('Xuất vượt tồn kho nón.');
+      if (row.itemType === 'ao' && row.targetType === 'nhan_vien' && qty > tonAoNV) throw new Error('Xuất vượt tồn kho áo nhân viên.');
+      if (row.itemType === 'ao' && row.targetType === 'khach_hang' && qty > tonAoKH) throw new Error('Xuất vượt tồn kho áo khách hàng.');
+    }
+
+    function appendExport_(row) {
+      const sh = getExportsSheet_();
+      sh.appendRow([
+        new Date(),
+        row.itemType || '',
+        row.targetType || '',
+        Number(row.quantity || 0),
+        row.hatCode || '',
+        row.receiver || '',
+        row.requester || '',
+        row.note || '',
+      ]);
+    }
+
+    5) Deploy:
+       - Apps Script > Deploy > New deployment > Web app
+       - Execute as: Me
+       - Who has access: Anyone
+       - Copy URL web app, dán vào biến API_URL trong file HTML.
+
+    ============================================================
+  -->
+</body>
+</html>

@@ -278,7 +278,11 @@
 <body>
   <div class="app-header">
     <h1 class="title">Quản lý áo & nón</h1>
-    <p class="subtitle">Giao diện ưu tiên điện thoại • lưu dữ liệu bằng Google Sheet</p>
+    <p class="subtitle">Quản lý nón áo phòng Maketing
+        - Tồn kho hiện tại
+        - Phiếu xuất kho
+        - Lịch sử xuất kho 
+    </p>
     <div class="tabs">
       <button class="tab-btn active" data-tab="overview">Tổng quan</button>
       <button class="tab-btn" data-tab="export">Xuất kho</button>
@@ -317,12 +321,12 @@
           <div class="stat-value" id="tonAoNV">0</div>
         </div>
         <div class="stat">
-          <div class="stat-label">Áo khách hàng còn lại</div>
-          <div class="stat-value" id="tonAoKH">0</div>
-        </div>
-        <div class="stat">
           <div class="stat-label">Áo nhân viên đã xuất</div>
           <div class="stat-value" id="xuatAoNV">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Áo khách hàng còn lại</div>
+          <div class="stat-value" id="tonAoKH">0</div>
         </div>
         <div class="stat">
           <div class="stat-label">Áo khách hàng đã xuất</div>
@@ -508,7 +512,7 @@
       $('tonNon').textContent = tonNon;
       $('xuatNonNV').textContent = xuatNonNV;
       $('xuatNonKH').textContent = xuatNonKH;
-      $('tongLuotXuat').textContent = state.exports.length;
+      $('tongLuotXuat').textContent = xuatNonNV + xuatNonKH;
       $('tonAoNV').textContent = tonAoNV;
       $('tonAoKH').textContent = tonAoKH;
       $('xuatAoNV').textContent = xuatAoNV;

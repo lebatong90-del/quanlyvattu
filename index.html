@@ -232,6 +232,16 @@
       color: var(--primary-dark);
     }
 
+    .badge.import {
+      background: #ff0000;
+      color: #ffffff;
+    }
+
+    .badge.export {
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+
     .history-title {
       font-size: 15px;
       font-weight: 700;
@@ -281,10 +291,12 @@
     <p class="subtitle">Quản lý nón áo phòng Maketing
         - Tồn kho hiện tại
         - Phiếu xuất kho
+        - Phiếu nhập kho
         - Lịch sử xuất kho 
     </p>
     <div class="tabs">
       <button class="tab-btn active" data-tab="overview">Tổng quan</button>
+      <button class="tab-btn" data-tab="import">Nhập kho</button>
       <button class="tab-btn" data-tab="export">Xuất kho</button>
       <button class="tab-btn" data-tab="history">Lịch sử</button>
     </div>
@@ -336,6 +348,20 @@
     </div>
 
     <div class="card">
+      <h2 class="section-title">Tồn nón tặng nông dân</h2>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Nón tặng còn lại</div>
+          <div class="stat-value" id="tonNonTang">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Nón tặng đã xuất</div>
+          <div class="stat-value" id="xuatNonTang">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
       <h2 class="section-title">Thiết lập tồn đầu kỳ</h2>
       <div class="notice">
         Bạn chỉ nhập tồn đầu kỳ để hệ thống tự tính tồn còn lại. Nón chỉ có 1 kho tổng, nhưng khi xuất sẽ chia thành 2 mục đích: nón nhân viên hoặc nón khách hàng.
@@ -353,12 +379,63 @@
           <label for="inputTonAoKH">Tồn đầu kỳ áo khách hàng</label>
           <input type="number" id="inputTonAoKH" min="0" placeholder="Đang tải..." disabled/>
         </div>
+        <div>
+          <label for="inputTonNonTang">Tồn đầu kỳ nón tặng nông dân</label>
+          <input type="number" id="inputTonNonTang" min="0" placeholder="Đang tải..." disabled />
+        </div>
         <div class="full toolbar" style="align-items: end;">
-          <button class="btn btn-primary" id="saveSettingsBtn">Lưu tồn đầu kỳ</button>
+          <button class="btn btn-primary" id="saveSettingsBtn" disabled>Lưu tồn đầu kỳ</button>
           <button class="btn btn-secondary" id="reloadBtn">Tải lại dữ liệu</button>
         </div>
       </div>
       <div id="settingsStatus" class="status"></div>
+    </div>
+  </section>
+
+  <section id="import" class="tab-content">
+    <div class="card">
+      <h2 class="section-title">Phiếu nhập kho</h2>
+      <form id="importForm" class="form-grid">
+        <div>
+          <label for="importItemType">Mặt hàng</label>
+          <select id="importItemType" required>
+            <option value="">-- Chọn mặt hàng --</option>
+            <option value="non">Nón</option>
+            <option value="non_tang">Nón tặng nông dân</option>
+            <option value="ao">Áo</option>
+          </select>
+        </div>
+
+        <div id="importTargetTypeWrap">
+          <label for="importTargetType">Nhập cho</label>
+          <select id="importTargetType" required>
+            <option value="">-- Chọn đối tượng --</option>
+            <option value="nhan_vien">Nhân viên</option>
+            <option value="khach_hang">Khách hàng</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="importQuantity">Số lượng</label>
+          <input type="number" id="importQuantity" min="1" value="1" required />
+        </div>
+
+        <div>
+          <label for="supplier">Nhà cung cấp</label>
+          <input type="text" id="supplier" placeholder="Nhập tên nhà cung cấp" required />
+        </div>
+
+        <div class="full">
+          <label for="importNote">Ghi chú</label>
+          <textarea id="importNote" placeholder="Ghi chú thêm nếu có"></textarea>
+        </div>
+
+        <div class="full toolbar">
+          <button class="btn btn-primary" type="submit">Lưu phiếu nhập</button>
+          <button class="btn btn-secondary" type="button" id="clearImportFormBtn">Xóa form</button>
+        </div>
+      </form>
+      <div id="importStatus" class="status"></div>
     </div>
   </section>
 
@@ -371,11 +448,12 @@
           <select id="itemType" required>
             <option value="">-- Chọn mặt hàng --</option>
             <option value="non">Nón</option>
+            <option value="non_tang">Nón tặng nông dân</option>
             <option value="ao">Áo</option>
           </select>
         </div>
 
-        <div>
+        <div id="targetTypeWrap">
           <label for="targetType">Xuất cho</label>
           <select id="targetType" required>
             <option value="">-- Chọn đối tượng --</option>
@@ -420,11 +498,12 @@
 
   <section id="history" class="tab-content">
     <div class="card">
-      <h2 class="section-title">Lịch sử xuất kho</h2>
+      <h2 class="section-title">Lịch sử nhập/xuất kho</h2>
       <div class="filter-box">
         <select id="filterItem">
           <option value="all">Tất cả mặt hàng</option>
           <option value="non">Nón</option>
+          <option value="non_tang">Nón tặng nông dân</option>
           <option value="ao">Áo</option>
         </select>
         <select id="filterTarget">
@@ -434,7 +513,7 @@
         </select>
         <input type="text" id="searchKeyword" placeholder="Tìm theo người lấy / người yêu cầu / ghi chú" />
       </div>
-      <div class="small">Phần này cho xem lại toàn bộ thông tin đã xuất, kèm lọc nhanh.</div>
+      <div class="small">Phần này cho xem lại toàn bộ thông tin đã nhập/xuất, kèm lọc nhanh.</div>
       <div class="history-list" id="historyList" style="margin-top: 12px;"></div>
     </div>
   </section>
@@ -446,15 +525,17 @@
      * =========================
      * Thay URL bên dưới bằng URL web app của Google Apps Script.
      */
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwqBQBfWpKNFdGMhZpJSn_uFW5SQuU1xVJdxcGSgTM22U3nSp9FeVbqdI10oJV6Xhc/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzWVUpOxhZY_AcxWVYr8_BxJC0dRNuRa6pDHGx4xP4xBZZM7Xrur70yII9qE3SzVDPm/exec';
 
     const state = {
       settings: {
         tonDauKyNon: 0,
         tonDauKyAoNV: 0,
         tonDauKyAoKH: 0,
+        tonDauKyNonTang: 0,
       },
-      exports: []
+      exports: [],
+      imports: []
     };
 
     const $ = (id) => document.getElementById(id);
@@ -465,7 +546,7 @@
       return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
     };
 
-    const itemText = (v) => v === 'non' ? 'Nón' : 'Áo';
+    const itemText = (v) => v === 'non' ? 'Nón' : v === 'non_tang' ? 'Nón tặng nông dân' : 'Áo';
     const targetText = (v) => v === 'nhan_vien' ? 'Nhân viên' : 'Khách hàng';
 
     function setStatus(el, text, type = 'success') {
@@ -474,6 +555,13 @@
     }
 
     function switchTab(tabId) {
+      if (tabId === 'import') {
+        const password = prompt('Tính Năng Dành cho quản trị viên - Nhập mật khẩu để truy cập phần Nhập kho:');
+        if (password !== 'tinnongtntech') {
+          alert('Mật khẩu không đúng. Vui lòng liên hệ quản trị viên để nhập tồn kho.');
+          return;
+        }
+      }
       document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.tab === tabId);
       });
@@ -486,9 +574,21 @@
       const item = $('itemType').value;
       const target = $('targetType').value;
       const showHatCode = item === 'non' && target === 'nhan_vien';
+      const showTarget = item === 'ao';
+      $('targetTypeWrap').classList.toggle('hidden', !showTarget);
+      $('targetType').required = showTarget;
+      if (!showTarget) $('targetType').value = '';
       $('hatCodeWrap').classList.toggle('hidden', !showHatCode);
       $('hatCode').required = showHatCode;
       if (!showHatCode) $('hatCode').value = '';
+    }
+
+    function updateImportConditionalFields() {
+      const item = $('importItemType').value;
+      const showTarget = item === 'ao';
+      $('importTargetTypeWrap').classList.toggle('hidden', !showTarget);
+      $('importTargetType').required = showTarget;
+      if (!showTarget) $('importTargetType').value = '';
     }
 
     function calculateSummary() {
@@ -496,6 +596,11 @@
       let xuatNonKH = 0;
       let xuatAoNV = 0;
       let xuatAoKH = 0;
+      let xuatNonTang = 0;
+      let nhapNon = 0;
+      let nhapAoNV = 0;
+      let nhapAoKH = 0;
+      let nhapNonTang = 0;
 
       state.exports.forEach(row => {
         const qty = Number(row.quantity || 0);
@@ -503,11 +608,21 @@
         if (row.itemType === 'non' && row.targetType === 'khach_hang') xuatNonKH += qty;
         if (row.itemType === 'ao' && row.targetType === 'nhan_vien') xuatAoNV += qty;
         if (row.itemType === 'ao' && row.targetType === 'khach_hang') xuatAoKH += qty;
+        if (row.itemType === 'non_tang') xuatNonTang += qty;
       });
 
-      const tonNon = Math.max(0, Number(state.settings.tonDauKyNon || 0) - (xuatNonNV + xuatNonKH));
-      const tonAoNV = Math.max(0, Number(state.settings.tonDauKyAoNV || 0) - xuatAoNV);
-      const tonAoKH = Math.max(0, Number(state.settings.tonDauKyAoKH || 0) - xuatAoKH);
+      state.imports.forEach(row => {
+        const qty = Number(row.quantity || 0);
+        if (row.itemType === 'non') nhapNon += qty;
+        if (row.itemType === 'ao' && row.targetType === 'nhan_vien') nhapAoNV += qty;
+        if (row.itemType === 'ao' && row.targetType === 'khach_hang') nhapAoKH += qty;
+        if (row.itemType === 'non_tang') nhapNonTang += qty;
+      });
+
+      const tonNon = Math.max(0, Number(state.settings.tonDauKyNon || 0) + nhapNon - (xuatNonNV + xuatNonKH));
+      const tonAoNV = Math.max(0, Number(state.settings.tonDauKyAoNV || 0) + nhapAoNV - xuatAoNV);
+      const tonAoKH = Math.max(0, Number(state.settings.tonDauKyAoKH || 0) + nhapAoKH - xuatAoKH);
+      const tonNonTang = Math.max(0, Number(state.settings.tonDauKyNonTang || 0) + nhapNonTang - xuatNonTang);
 
       $('tonNon').textContent = tonNon;
       $('xuatNonNV').textContent = xuatNonNV;
@@ -517,10 +632,13 @@
       $('tonAoKH').textContent = tonAoKH;
       $('xuatAoNV').textContent = xuatAoNV;
       $('xuatAoKH').textContent = xuatAoKH;
+      $('tonNonTang').textContent = tonNonTang;
+      $('xuatNonTang').textContent = xuatNonTang;
 
       $('inputTonNon').value = Number(state.settings.tonDauKyNon || 0);
       $('inputTonAoNV').value = Number(state.settings.tonDauKyAoNV || 0);
       $('inputTonAoKH').value = Number(state.settings.tonDauKyAoKH || 0);
+      $('inputTonNonTang').value = Number(state.settings.tonDauKyNonTang || 0);
     }
 
     function renderHistory() {
@@ -529,18 +647,21 @@
       const filterTarget = $('filterTarget').value;
       const keyword = $('searchKeyword').value.trim().toLowerCase();
 
-      let list = [...state.exports].reverse();
+      let list = [
+        ...state.exports.map(row => ({ ...row, action: 'export' })),
+        ...state.imports.map(row => ({ ...row, action: 'import' }))
+      ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
       list = list.filter(row => {
         const okItem = filterItem === 'all' || row.itemType === filterItem;
         const okTarget = filterTarget === 'all' || row.targetType === filterTarget;
-        const searchText = `${row.receiver || ''} ${row.requester || ''} ${row.note || ''} ${row.hatCode || ''}`.toLowerCase();
+        const searchText = `${row.supplier || ''} ${row.receiver || ''} ${row.requester || ''} ${row.note || ''} ${row.importNote || ''} ${row.hatCode || ''}`.toLowerCase();
         const okKeyword = !keyword || searchText.includes(keyword);
         return okItem && okTarget && okKeyword;
       });
 
       if (!list.length) {
-        wrap.innerHTML = '<div class="notice">Chưa có dữ liệu xuất kho.</div>';
+        wrap.innerHTML = '<div class="notice">Chưa có dữ liệu.</div>';
         return;
       }
 
@@ -548,16 +669,17 @@
         <div class="history-item">
           <div class="history-top">
             <div>
-              <div class="badge">${itemText(row.itemType)} • ${targetText(row.targetType)}</div>
+              <div class="badge ${row.action === 'import' ? 'import' : 'export'}">${row.action === 'import' ? 'Nhập' : 'Xuất'} • ${itemText(row.itemType)} • ${targetText(row.targetType)}</div>
               <p class="history-title" style="margin-top:8px;">Số lượng: ${row.quantity}</p>
             </div>
             <div class="history-date">${formatDateTime(row.createdAt)}</div>
           </div>
           <div class="history-meta">
-            <div><strong>Người lấy:</strong> ${escapeHtml(row.receiver || '')}</div>
-            <div><strong>Người yêu cầu:</strong> ${escapeHtml(row.requester || '-')}</div>
-            ${row.itemType === 'non' && row.targetType === 'nhan_vien' ? `<div><strong>Số nón:</strong> ${escapeHtml(row.hatCode || '-')}</div>` : ''}
-            <div><strong>Ghi chú:</strong> ${escapeHtml(row.note || '-')}</div>
+            ${row.action === 'import' ? `<div><strong>Nhà cung cấp:</strong> ${escapeHtml(row.supplier || '')}</div>` : ''}
+            ${row.action === 'export' ? `<div><strong>Người lấy:</strong> ${escapeHtml(row.receiver || '')}</div>` : ''}
+            ${row.action === 'export' ? `<div><strong>Người yêu cầu:</strong> ${escapeHtml(row.requester || '-')}</div>` : ''}
+            ${row.itemType === 'non' && row.targetType === 'nhan_vien' && row.action === 'export' ? `<div><strong>Số nón:</strong> ${escapeHtml(row.hatCode || '-')}</div>` : ''}
+            <div><strong>Ghi chú:</strong> ${escapeHtml(row.note || row.importNote || '-')}</div>
           </div>
         </div>
       `).join('');
@@ -604,6 +726,7 @@
         const data = await api('getData');
         state.settings = data.settings || state.settings;
         state.exports = Array.isArray(data.exports) ? data.exports : [];
+        state.imports = Array.isArray(data.imports) ? data.imports : [];
         calculateSummary();
         renderHistory();
         setStatus($('settingsStatus'), 'Tải dữ liệu thành công.', 'success');
@@ -637,6 +760,48 @@
       setStatus($('exportStatus'), '', 'success');
     }
 
+    function clearImportForm() {
+      $('importForm').reset();
+      $('importQuantity').value = 1;
+      updateImportConditionalFields();
+      setStatus($('importStatus'), '', 'success');
+    }
+
+    async function submitImport(e) {
+      e.preventDefault();
+      const payload = {
+        itemType: $('importItemType').value,
+        targetType: $('importTargetType').value,
+        quantity: Number($('importQuantity').value || 0),
+        supplier: $('supplier').value.trim(),
+        importNote: $('importNote').value.trim(),
+      };
+
+      if (!payload.itemType || !payload.quantity || !payload.supplier) {
+        setStatus($('importStatus'), 'Vui lòng nhập đủ thông tin bắt buộc.', 'error');
+        return;
+      }
+
+      if (payload.itemType === 'ao' && !payload.targetType) {
+        setStatus($('importStatus'), 'Vui lòng chọn đối tượng cho áo.', 'error');
+        return;
+      }
+
+      try {
+        setStatus($('importStatus'), 'Đang lưu phiếu nhập...', 'warn');
+        const data = await api('saveImport', { importRow: payload });
+        state.imports = Array.isArray(data.imports) ? data.imports : state.imports;
+        state.settings = data.settings || state.settings;
+        calculateSummary();
+        renderHistory();
+        clearImportForm();
+        setStatus($('importStatus'), 'Đã lưu phiếu nhập thành công.', 'success');
+        switchTab('overview');
+      } catch (err) {
+        setStatus($('importStatus'), err.message, 'error');
+      }
+    }
+
     async function submitExport(e) {
       e.preventDefault();
       const payload = {
@@ -649,7 +814,8 @@
         note: $('note').value.trim(),
       };
 
-      if (!payload.itemType || !payload.targetType || !payload.quantity || !payload.receiver) {
+      const requiresTarget = payload.itemType !== 'non_tang';
+      if (!payload.itemType || (requiresTarget && !payload.targetType) || !payload.quantity || !payload.receiver) {
         setStatus($('exportStatus'), 'Vui lòng nhập đủ thông tin bắt buộc.', 'error');
         return;
       }
@@ -673,6 +839,10 @@
         setStatus($('exportStatus'), 'Số lượng xuất vượt tồn kho áo khách hàng.', 'error');
         return;
       }
+      if (payload.itemType === 'non_tang' && payload.quantity > current.tonNonTang) {
+        setStatus($('exportStatus'), 'Số lượng xuất vượt tồn kho nón tặng nông dân.', 'error');
+        return;
+      }
 
       try {
         setStatus($('exportStatus'), 'Đang lưu phiếu xuất...', 'warn');
@@ -690,17 +860,27 @@
     }
 
     function getCurrentStockPreview() {
-      let xuatNon = 0, xuatAoNV = 0, xuatAoKH = 0;
+      let xuatNon = 0, xuatAoNV = 0, xuatAoKH = 0, xuatNonTang = 0;
+      let nhapNon = 0, nhapAoNV = 0, nhapAoKH = 0, nhapNonTang = 0;
       state.exports.forEach(row => {
         const qty = Number(row.quantity || 0);
         if (row.itemType === 'non') xuatNon += qty;
         if (row.itemType === 'ao' && row.targetType === 'nhan_vien') xuatAoNV += qty;
         if (row.itemType === 'ao' && row.targetType === 'khach_hang') xuatAoKH += qty;
+        if (row.itemType === 'non_tang') xuatNonTang += qty;
+      });
+      state.imports.forEach(row => {
+        const qty = Number(row.quantity || 0);
+        if (row.itemType === 'non') nhapNon += qty;
+        if (row.itemType === 'ao' && row.targetType === 'nhan_vien') nhapAoNV += qty;
+        if (row.itemType === 'ao' && row.targetType === 'khach_hang') nhapAoKH += qty;
+        if (row.itemType === 'non_tang') nhapNonTang += qty;
       });
       return {
-        tonNon: Math.max(0, Number(state.settings.tonDauKyNon || 0) - xuatNon),
-        tonAoNV: Math.max(0, Number(state.settings.tonDauKyAoNV || 0) - xuatAoNV),
-        tonAoKH: Math.max(0, Number(state.settings.tonDauKyAoKH || 0) - xuatAoKH),
+        tonNon: Math.max(0, Number(state.settings.tonDauKyNon || 0) + nhapNon - xuatNon),
+        tonAoNV: Math.max(0, Number(state.settings.tonDauKyAoNV || 0) + nhapAoNV - xuatAoNV),
+        tonAoKH: Math.max(0, Number(state.settings.tonDauKyAoKH || 0) + nhapAoKH - xuatAoKH),
+        tonNonTang: Math.max(0, Number(state.settings.tonDauKyNonTang || 0) + nhapNonTang - xuatNonTang),
       };
     }
 
@@ -710,10 +890,13 @@
 
     $('itemType').addEventListener('change', updateConditionalFields);
     $('targetType').addEventListener('change', updateConditionalFields);
+    $('importItemType').addEventListener('change', updateImportConditionalFields);
     $('saveSettingsBtn').addEventListener('click', saveSettings);
     $('reloadBtn').addEventListener('click', loadData);
     $('clearFormBtn').addEventListener('click', clearForm);
+    $('clearImportFormBtn').addEventListener('click', clearImportForm);
     $('exportForm').addEventListener('submit', submitExport);
+    $('importForm').addEventListener('submit', submitImport);
     $('filterItem').addEventListener('change', renderHistory);
     $('filterTarget').addEventListener('change', renderHistory);
     $('searchKeyword').addEventListener('input', renderHistory);
@@ -726,18 +909,23 @@
     GOOGLE APPS SCRIPT MẪU (DÁN RIÊNG VÀO Apps Script, KHÔNG PHẢI TRONG HTML)
     ============================================================
 
-    1) Tạo 1 Google Sheet mới gồm 2 sheet:
+    1) Tạo 1 Google Sheet mới gồm 3 sheet:
        - Sheet 1: SETTINGS
        - Sheet 2: EXPORTS
+       - Sheet 3: IMPORTS
 
     2) Cấu trúc sheet SETTINGS:
        A1:key | B1:value
        A2:tonDauKyNon | B2:100
        A3:tonDauKyAoNV | B3:50
        A4:tonDauKyAoKH | B4:30
+       A5:tonDauKyNonTang | B5:20
 
     3) Cấu trúc sheet EXPORTS (header dòng 1):
        createdAt | itemType | targetType | quantity | hatCode | receiver | requester | note
+
+    4) Cấu trúc sheet IMPORTS (header dòng 1):
+       createdAt | itemType | targetType | quantity | supplier | importNote
 
     4) Code Apps Script:
 
@@ -749,7 +937,7 @@
         const action = body.action;
 
         if (action === 'getData') {
-          return jsonOut({ success: true, settings: getSettings_(), exports: getExports_() });
+          return jsonOut({ success: true, settings: getSettings_(), exports: getExports_(), imports: getImports_() });
         }
 
         if (action === 'saveSettings') {
@@ -761,7 +949,14 @@
           const row = body.exportRow || {};
           validateExport_(row);
           appendExport_(row);
-          return jsonOut({ success: true, settings: getSettings_(), exports: getExports_() });
+          return jsonOut({ success: true, settings: getSettings_(), exports: getExports_(), imports: getImports_() });
+        }
+
+        if (action === 'saveImport') {
+          const row = body.importRow || {};
+          validateImport_(row);
+          appendImport_(row);
+          return jsonOut({ success: true, settings: getSettings_(), exports: getExports_(), imports: getImports_() });
         }
 
         return jsonOut({ success: false, message: 'Action không hợp lệ.' });
@@ -788,6 +983,10 @@
       return getSS_().getSheetByName('EXPORTS');
     }
 
+    function getImportsSheet_() {
+      return getSS_().getSheetByName('IMPORTS');
+    }
+
     function getSettings_() {
       const sh = getSettingsSheet_();
       const values = sh.getRange(2, 1, Math.max(sh.getLastRow()-1, 0), 2).getValues();
@@ -795,6 +994,7 @@
         tonDauKyNon: 0,
         tonDauKyAoNV: 0,
         tonDauKyAoKH: 0,
+        tonDauKyNonTang: 0,
       };
       values.forEach(r => {
         if (r[0]) map[r[0]] = Number(r[1] || 0);
@@ -809,6 +1009,7 @@
         ['tonDauKyNon', Number(settings.tonDauKyNon || 0)],
         ['tonDauKyAoNV', Number(settings.tonDauKyAoNV || 0)],
         ['tonDauKyAoKH', Number(settings.tonDauKyAoKH || 0)],
+        ['tonDauKyNonTang', Number(settings.tonDauKyNonTang || 0)],
       ];
       sh.clearContents();
       sh.getRange(1, 1, rows.length, rows[0].length).setValues(rows);
@@ -842,23 +1043,35 @@
 
       const settings = getSettings_();
       const exports = getExports_();
+      const imports = getImports_();
 
-      let xuatNon = 0, xuatAoNV = 0, xuatAoKH = 0;
+      let xuatNon = 0, xuatAoNV = 0, xuatAoKH = 0, xuatNonTang = 0;
+      let nhapNon = 0, nhapAoNV = 0, nhapAoKH = 0, nhapNonTang = 0;
       exports.forEach(r => {
         const qty = Number(r.quantity || 0);
         if (r.itemType === 'non') xuatNon += qty;
         if (r.itemType === 'ao' && r.targetType === 'nhan_vien') xuatAoNV += qty;
         if (r.itemType === 'ao' && r.targetType === 'khach_hang') xuatAoKH += qty;
+        if (r.itemType === 'non_tang') xuatNonTang += qty;
+      });
+      imports.forEach(r => {
+        const qty = Number(r.quantity || 0);
+        if (r.itemType === 'non') nhapNon += qty;
+        if (r.itemType === 'ao' && r.targetType === 'nhan_vien') nhapAoNV += qty;
+        if (r.itemType === 'ao' && r.targetType === 'khach_hang') nhapAoKH += qty;
+        if (r.itemType === 'non_tang') nhapNonTang += qty;
       });
 
-      const tonNon = Number(settings.tonDauKyNon || 0) - xuatNon;
-      const tonAoNV = Number(settings.tonDauKyAoNV || 0) - xuatAoNV;
-      const tonAoKH = Number(settings.tonDauKyAoKH || 0) - xuatAoKH;
+      const tonNon = Number(settings.tonDauKyNon || 0) + nhapNon - xuatNon;
+      const tonAoNV = Number(settings.tonDauKyAoNV || 0) + nhapAoNV - xuatAoNV;
+      const tonAoKH = Number(settings.tonDauKyAoKH || 0) + nhapAoKH - xuatAoKH;
+      const tonNonTang = Number(settings.tonDauKyNonTang || 0) + nhapNonTang - xuatNonTang;
       const qty = Number(row.quantity || 0);
 
       if (row.itemType === 'non' && qty > tonNon) throw new Error('Xuất vượt tồn kho nón.');
       if (row.itemType === 'ao' && row.targetType === 'nhan_vien' && qty > tonAoNV) throw new Error('Xuất vượt tồn kho áo nhân viên.');
       if (row.itemType === 'ao' && row.targetType === 'khach_hang' && qty > tonAoKH) throw new Error('Xuất vượt tồn kho áo khách hàng.');
+      if (row.itemType === 'non_tang' && qty > tonNonTang) throw new Error('Xuất vượt tồn kho nón tặng nông dân.');
     }
 
     function appendExport_(row) {
@@ -872,6 +1085,40 @@
         row.receiver || '',
         row.requester || '',
         row.note || '',
+      ]);
+    }
+
+    function getImports_() {
+      const sh = getImportsSheet_();
+      const lastRow = sh.getLastRow();
+      if (lastRow < 2) return [];
+      const values = sh.getRange(2, 1, lastRow - 1, 6).getValues();
+      return values.map(r => ({
+        createdAt: r[0],
+        itemType: r[1],
+        targetType: r[2],
+        quantity: Number(r[3] || 0),
+        supplier: r[4] || '',
+        importNote: r[5] || '',
+      }));
+    }
+
+    function validateImport_(row) {
+      if (!row.itemType) throw new Error('Thiếu mặt hàng.');
+      if (!row.quantity || Number(row.quantity) <= 0) throw new Error('Số lượng không hợp lệ.');
+      if (!row.supplier) throw new Error('Thiếu nhà cung cấp.');
+      if (row.itemType === 'ao' && !row.targetType) throw new Error('Thiếu đối tượng nhập cho áo.');
+    }
+
+    function appendImport_(row) {
+      const sh = getImportsSheet_();
+      sh.appendRow([
+        new Date(),
+        row.itemType || '',
+        row.targetType || '',
+        Number(row.quantity || 0),
+        row.supplier || '',
+        row.importNote || '',
       ]);
     }
 
